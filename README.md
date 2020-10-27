@@ -1,14 +1,63 @@
 # flutter_statelet
 
-A Flutter package that helps you to manage your state
+A Flutter package that helps you to reuse business logic.
 
-## Getting Started
+# What is `Statelet`
 
-This project is a starting point for a Dart
-[package](https://flutter.dev/developing-packages/),
-a library module containing code that can be shared easily across
-multiple Flutter or Dart projects.
+A `Statelet` is similar to a `state`，but without `Widget build()`. 
+That means `Statelet` has all the lifecycle callbacks `State`
+has and represent piece of business logic that can be reused around.
 
-For help getting started with Flutter, view our 
-[online documentation](https://flutter.dev/docs), which offers tutorials, 
-samples, guidance on mobile development, and a full API reference.
+A `State` can have multiple `Statelet`s, and you don't have to worry
+about `setup` and `teardown` processes. Thease will be taken care of by 
+`StateletHost`. 
+
+# How to ues `Statelet`
+See Counter example below:
+```dart
+void main() {
+  runApp(MaterialApp(
+    home: StateletExample(),
+  ));
+}
+
+class StateletExample extends StatefulWidget {
+  @override
+  _StateletExampleState createState() => _StateletExampleState();
+}
+// Mix in the state with StateletHost
+class _StateletExampleState extends State<StateletExample> with StateletHost {
+  ValueNotifier<int> counter;
+
+  @override
+  void initState() {
+    super.initState();
+    // call install add the statelet to the State.
+    counter = install(ValueNotifierStatelet(initValue: 0)).wrapper;
+    install(FunctionStatelet(
+        initState: () => print('initState'),
+        dispose: () => print('dispose')));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Statelet example'),
+      ),
+      body: Center(
+        child: Text('You have pushed the button ${counter.value} times'),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => counter.value++,
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+}
+
+```
+Checkout [statelet.dart](lib/src/statelet.dart) for more infomation.
+
+
+
